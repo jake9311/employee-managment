@@ -7,4 +7,16 @@
 
 
 
-/דוחות אקסל/
+# dependencies
+node_modules/
+
+# test outputs
+test-results/
+coverage/
+playwright-report/
+
+# local/generated reports
+דוחות אקסל/
+*.xlsx
+*.xls
+*.csv
