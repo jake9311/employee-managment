@@ -21,16 +21,8 @@ const CancellationSchema=new mongoose.Schema({
     reason: {type: String}
 });
 
-// const GuardSchema= new mongoose.Schema({
-//     ownerId: {type: String, required: true},
-//     name: String,
-//     sickDays:[SickDaySchema],
-//     lateEntries:[LateEntrySchema],
-//     cancellations:[{ date: String, reason: String }],
-// });
 
 const GuardSchema= new mongoose.Schema({
-    ownerId: {type: String, required: true},
     orgId: {type: String, required: true},
     name: String,
     sickDays:[SickDaySchema],
@@ -38,5 +30,7 @@ const GuardSchema= new mongoose.Schema({
     cancellations:[{ date: String, reason: String }],
 });
 
+GuardSchema.index({orgId:1});
+GuardSchema.index({orgId:1, name:1});
 
 module.exports= mongoose.model("Guard", GuardSchema);

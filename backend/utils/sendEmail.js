@@ -1,10 +1,12 @@
 require ('dotenv').config();
 const sgMail = require('@sendgrid/mail');
-const e = require('express');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 async function sendEmail(to, subject, text) {
+    if (!to) {
+        throw new Error('Email address is required');
+    }   
     const msg = {
         to ,
         from: process.env.FROM_EMAIL,
@@ -19,7 +21,6 @@ async function sendEmail(to, subject, text) {
             console.error(error.response.body.errors);
         }
         else{
-        // console.log('Error sending email', error.response?.body)|| error.message|| error;
         console.error(error.message|| error);
         }
     }

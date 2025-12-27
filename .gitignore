@@ -1,1 +1,10 @@
 .env
+
+
+#word documents
+*.docx
+~$.docx
+
+
+
+/דוחות אקסל/

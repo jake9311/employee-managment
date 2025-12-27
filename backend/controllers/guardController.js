@@ -2,42 +2,43 @@ const Guard = require("../models/Guard");
 const {sendEmail} = require('../utils/sendEmail');
 const User = require("../models/User");
 
-// exports.createGuard = async (req, res) => {
-//     try {
-//        const {ownerId,name}= req.body;
-//        const guard= new Guard({ ownerId, name, sickDays: [], lateEntries: [], cancellations: [] });
-//        await guard.save();
-//        res.status(201).json(guard);
-//     } catch (error) {
-//         console.error('שגיאה ביצירת מאבטח: ', error);
-//         res.status(500).json({ error: error.message });
-//     }
-// };
 
 exports.createGuard = async (req, res) => {
-    if(!req.user|| !req.user.orgId) 
+    try{
+    if(!req.user) 
         return res.status(403).json({error: 'Unauthorized- no user info'});
-    // try {
+   
        const {name}= req.body;
        const user= await User.findOne({googleId: req.user.googleId});
        if(!user) return res.status(403).json({error: 'User not familiar with the system'});
        
-       const guard= new Guard({  name,
+       const guard= new Guard({ 
+         name,
         orgId: user.orgId, 
         sickDays: [], lateEntries: [], cancellations: [] });
        await guard.save();
        res.status(201).json(guard);
-    // } catch (error) {
-    //     console.error('שגיאה ביצירת מאבטח: ', error);
-    //     res.status(500).json({ error: error.message });
-    // }
+       }
+    catch(error){
+        console.error('error creating guard',error);
+        res.status(500).json({ error: error.message });
+    }
 };
 
-exports.getGuardsByUser=async (req,res)=>{
+exports.getGuards=async (req,res)=>{
     try{
-        const {userId}= req.params;
-        const guards= await Guard.find({ ownerId: userId });
-       res.json(guards);
+        if (!req.user) {
+            return res.status(401).json({ error: 'Unauthorized- no user info' });
+        }
+
+
+        const user= await User.findOne({googleId: req.user.googleId});
+        if(!user){
+            return res.status(403).json({error: 'User not familiar with the system'});
+        }
+        const guards =await Guard.find({orgId: user.orgId}).sort({name: 1});
+  
+        res.json(guards);
     }
     catch(error){
         res.status(500).json({ error: error.message });
@@ -49,7 +50,7 @@ exports.updateGuard= async (req, res)=>{
     try{
         const {id} =req.params;
         const update = await Guard.findByIdAndUpdate(id, req.body, {new: true});
-        res.json(update);
+        return res.json(update);
     }
     catch(error){
         res.status(500).json({ error: error.message });
@@ -86,6 +87,10 @@ exports.addLateEntry= async (req, res)=>{
 res.status(500).json({error: err.message});
     }
     };
+
+
+
+
 
     exports.addSickDay= async (req,res)=>{
         const {id}= req.params;
@@ -131,26 +136,28 @@ res.status(500).json({error: err.message});
             for (const sickDay of guard.sickDays){
                 const end= new Date(sickDay.endDate);
                 const differentDays= Math.floor((now-end)/(1000*60*60*24));
-//
-console.log(`בודק בעלים של ${guard.name}: ${guard.ownerId}`);
-const owner = await User.findOne({ googleId: guard.ownerId });
-if (!owner) {
-  console.warn('⚠️ לא נמצא משתמש תואם ב-User למסד');
-  continue;
-}
-console.log('נמצא משתמש:', owner);
 
-
-
-
-//
                 
                 if(!sickDay.hasApproval && !sickDay.notified && differentDays>=4){
-                    console.log(owner.email);
                     sickDay.notified= true;
                     update= true;
-                    sendEmail(owner.email,`תזכורת להבאת אישור מחלה התראה:`,`  ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                    const userInOrg= await User.find({orgId: guard.orgId});
+
+                    for (const u of userInOrg){
+                        if (u.email){
+                            try{
+                                sendEmail(u.email,`תזכורת להבאת אישור מחלה התראה:`,`  ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                                console.log(`התראה: מאבטח ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                            }catch (err){
+                                console.error('שגיאה בשליחת המייל',err);
+                            }
+                        }
+                    }
+                    sickDay.notified= true;
+                    update= true;
                     console.log(`התראה: מאבטח ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                 
+                    
                     
                 }
               
@@ -179,8 +186,14 @@ console.log('נמצא משתמש:', owner);
 
     exports.getLastReports=async (req,res)=>{
         try{
-            const ownerId= req.params.ownerId;
-            const guards= await Guard.find({ownerId});
+            if (!req.user ) {
+                return res.status(401).json({ error: 'Unauthorized' });
+            }
+            const user= await User.findOne({googleId: req.user.googleId});
+            if(!user){
+                return res.status(403).json({error: 'User not familiar with the system'});
+            }
+            const guards= await Guard.find({orgId: user.orgId});
 
             const reports= guards.map(guard=>{
                 const late= guard.lateEntries.map(entry=>({type:"איחור", date:entry.date, reason:entry.reason, scheduledHour:entry.scheduledHour, actualHour:entry.actualHour, guardName:guard.name, guardId:guard._id}));
@@ -197,10 +210,18 @@ console.log('נמצא משתמש:', owner);
 
 exports.getReportsByGuardId = async (req, res) => {
   try {
-    const { ownerId, guardId } = req.params;
+    if (!req.user ) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const {guardId } = req.params;
 
-    // בדיקה שהמאבטח שייך למנהל
-    const guard = await Guard.findOne({ _id: guardId, ownerId });
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) {
+      return res.status(403).json({ error: 'User not familiar with the system' });
+    }
+ 
+  
+    const guard = await Guard.findOne({ _id: guardId, orgId: user.orgId });
     if (!guard) {
       return res.status(403).json({ error: 'Guard not found or access denied' });
     }
@@ -232,7 +253,7 @@ exports.getReportsByGuardId = async (req, res) => {
 
     const allReports = [...late, ...sick, ...cancellations];
 
-    allReports.sort((a, b) => new Date(b.date) - new Date(a.date)); // מיון לפי תאריך יורד
+    allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
 
     res.json(allReports);
   } catch (err) {
