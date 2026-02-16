@@ -135,32 +135,34 @@ res.status(500).json({error: err.message});
 
             for (const sickDay of guard.sickDays){
                 const end= new Date(sickDay.endDate);
-                const differentDays= Math.floor((now-end)/(1000*60*60*24));
+                const MS_IN_DAY= 1000*60*60*24;
+                const differentDays= Math.floor(
+                (Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())-
+                Date.UTC(end.getFullYear(), end.getMonth(), end.getDate()))/MS_IN_DAY);
+                // const differentDays= Math.floor((now-end)/(1000*60*60*24));
 
                 
                 if(!sickDay.hasApproval && !sickDay.notified && differentDays>=4){
-                    sickDay.notified= true;
-                    update= true;
                     const userInOrg= await User.find({orgId: guard.orgId});
-
+                    let sentAtLeastOne= false;
                     for (const u of userInOrg){
                         if (u.email){
                             try{
-                                sendEmail(u.email,`תזכורת להבאת אישור מחלה התראה:`,`  ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                                await sendEmail(
+                                    u.email,`תזכורת להבאת אישור מחלה התראה:`,`  ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
+                                    sentAtLeastOne= true;
                                 console.log(`התראה: מאבטח ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
                             }catch (err){
                                 console.error('שגיאה בשליחת המייל',err);
                             }
                         }
+                        if(sentAtLeastOne){
+                            sickDay.notified= true;
+                            update= true;
+                            console.log(`התראה נשלחה עבור ${guard.name} (${differentDays} ימים)`);
+                        }
                     }
-                    sickDay.notified= true;
-                    update= true;
-                    console.log(`התראה: מאבטח ${guard.name} סיים מחלה לפני ${differentDays} ימים ולא הביא אישור מחלה`);
-                 
-                    
-                    
                 }
-              
             }
             if (update) await guard.save();
         }

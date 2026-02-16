@@ -3,6 +3,7 @@ const express= require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const app = express();
+const cron = require('node-cron');
 const {checkSickDayApprovals} = require('./controllers/guardController');
 
 
@@ -64,11 +65,8 @@ mongoose.connect(uri)
 app.listen(port,()=>{
     console.log("Server is running on port ", port);
     checkSickDayApprovals();
-    setInterval(checkSickDayApprovals, 24 * 60 * 60 * 1000);
-    
+    // setInterval(checkSickDayApprovals, 24 * 60 * 60 * 1000);
+    cron.schedule('0 8 * * *', checkSickDayApprovals);
 
 })
 
-
-
-// sendEmail('ymakoria@gmail.com', 'Test email', 'This is a test email');

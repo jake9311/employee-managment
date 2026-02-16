@@ -1,30 +1,32 @@
-require ('dotenv').config();
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "..", ".env") });
+const axios = require("axios");
 async function sendEmail(to, subject, text) {
-    if (!to) {
-        throw new Error('Email address is required');
-    }   
-    const msg = {
-        to ,
-        from: process.env.FROM_EMAIL,
-        subject,
-        text,
-    };
-    try{
-        await sgMail.send(msg);
-        console.log(`Email sent successfully to ${to}`);
-    }catch(error){
-        if (error.response&&error.response.body&& error.response.body.errors) {
-            console.error(error.response.body.errors);
-        }
-        else{
-        console.error(error.message|| error);
-        }
-    }
+  if (!to) throw new Error("Email address is required");
 
+  await axios.post(
+    "https://api.brevo.com/v3/smtp/email",
+    {
+      sender: { email: process.env.FROM_EMAIL },
+      to: [{ email: to }],
+      subject,
+      textContent: text,
+      htmlContent: `
+        <div style="font-family: Arial; padding: 10px;">
+          <h3>${subject}</h3>
+          <p>${text}</p>
+        </div>
+      `
+    },
+    {
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "content-type": "application/json",
+      },
+    }
+  );
+
+  console.log(`Email sent successfully to ${to}`);
 }
 
-module.exports = {sendEmail};
+module.exports = { sendEmail };
