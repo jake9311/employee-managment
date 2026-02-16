@@ -1,0 +1,131 @@
+<div dir="rtl" style="text-align: right; margin: auto;">
+
+<br>
+
+<span>
+<h3>הוסף דיווח</h3>
+<div>שם העובד:</div><br>
+<select [(ngModel)]="selectedGuardId"  >
+<option *ngFor="let guard of guards" [value]="guard._id">{{guard.name}}</option>
+</select>
+
+<div *ngIf ="selectedGuardId">
+<h4>בחר סוג דיווח</h4>
+
+<select [(ngModel)]="reportType" >
+    <option value="late">איחור</option>
+    <option value="sick">מחלה</option>
+    <option value="cancellation">ביטול</option>
+</select>
+
+
+
+
+<div *ngIf="reportType === 'late'">
+    <br>
+  <label>
+    תאריך:
+    <input type="date" [(ngModel)]="reportData.late.date" required />
+  </label>
+  <label>
+    שעת מקור:
+    <input type="time" [(ngModel)]="reportData.late.scheduledHour" required />
+  </label>
+  <label>
+    שעת הגעה:
+    <input type="time" [(ngModel)]="reportData.late.actualHour" required />
+  </label>
+  <label>
+    סיבה:
+    <input type="text" [(ngModel)]="reportData.late.reason"  />
+  </label>
+</div>
+
+
+
+<div *ngIf="reportType === 'sick'">
+    <br>
+<label>
+    תאריך התחלה:
+    <input type="date" [(ngModel)]="reportData.sick.startDate" required />
+</label>
+
+<label style="margin-right: 10px;">
+    תאריך סיום:
+    <input type="date" [(ngModel)]="reportData.sick.endDate" required />
+</label>
+
+<label  style="margin-right: 10px;">
+    סיבה:
+    <input type="text" [(ngModel)]="reportData.sick.reason"  />
+</label>
+
+</div>
+
+<div *ngIf="reportType === 'cancellation'">
+    <br>
+    <label>
+        תאריך ביטול:
+        <input type="date" [(ngModel)]="reportData.cancellation.date" required />
+    </label>
+    
+    <label style="margin-right: 10px;" >
+        סיבה:
+        <input type="text" [(ngModel)]="reportData.cancellation.reason"  />
+    </label>
+</div>
+<button style="margin-right: 10px;" (click)="submitReport()" >שלח דיווח</button>
+
+</div><br><br>
+
+</span>
+
+
+<!-- הצגת טבלת דיווחים אחרונים -->
+
+<mat-card>
+<mat-card-title><h2>דיווחים אחרונים </h2> </mat-card-title>
+<table mat-table [dataSource]="lastReports" class="mat-elevation-z8" style="direction: rtl; width: 100%;">
+
+    <ng-container matColumnDef="guardName">
+        <th mat-header-cell *matHeaderCellDef> שם מאבטח </th>
+        <td mat-cell *matCellDef="let report">
+            <button mat-button (click)="viewGuardReports(report.guardId)">{{ report.guardName }}</button></td>
+    </ng-container>
+
+
+<ng-container matColumnDef="type">
+    <th mat-header-cell *matHeaderCellDef>סוג דיווח</th>
+    <td mat-cell *matCellDef="let report">{{ report.type }}</td>
+</ng-container>
+
+<ng-container matColumnDef="date">
+    <th mat-header-cell *matHeaderCellDef>תאריך דיווח</th>
+    <td mat-cell *matCellDef="let report">
+        <ng-container *ngIf="report.startDate && report.endDate; else singleDate">
+           {{ report.endDate | date:'dd/MM/yyyy' }}- {{ report.startDate | date:'dd/MM/yyyy' }} 
+        </ng-container>
+        <ng-template #singleDate>
+            {{ report.date | date:'dd/MM/yyyy' }}
+        </ng-template>
+    </td>
+</ng-container>
+
+
+<ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>צפיה</th>
+    <td mat-cell *matCellDef="let report">
+        <button mat-icon-button color="primary" (click)="viewReport(report)" data-testid='view-report-button'>
+            <mat-icon>open_in_new</mat-icon>
+        </button>
+    </td>
+</ng-container>
+
+
+<tr mat-header-row *matHeaderRowDef="['guardName', 'type', 'date',  'actions']"></tr>
+<tr mat-row *matRowDef="let report; columns: ['guardName', 'type', 'date', 'actions']"></tr>
+
+</table>
+
+</mat-card>
+</div>

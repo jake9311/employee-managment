@@ -1,0 +1,142 @@
+ <mat-card >
+<mat-card-title> ייצוא דוחות </mat-card-title>
+<form>
+        <mat-form-field >
+            <mat-label>שם העובד</mat-label>
+            <input type="text" matInput placeholder="הקלד את שם העובד" 
+            [(ngModel)]="selectedGuardName" [matAutocomplete]="auto" (input)="filterGuards()"
+            name="guardName"/>
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onGuardSelected($event.option.value)">
+                <mat-option [value]="''">כל העובדים</mat-option>
+                <mat-option *ngFor="let guard of filteredGuards" [value]="guard.name">{{ guard.name }}</mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+
+
+<mat-form-field >
+    <mat-label>מתאריך</mat-label>
+    <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" name="startDate">
+    <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+    <mat-datepicker #startPicker></mat-datepicker>
+</mat-form-field>
+
+<mat-form-field >
+    <mat-label>עד תאריך</mat-label>
+    <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" name="endDate">
+    <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+    <mat-datepicker #endPicker></mat-datepicker>
+</mat-form-field>
+
+<mat-form-field>
+    <mat-label>סוג דיווח</mat-label>
+    <mat-select [(ngModel)]="selectedType" name="type">
+        <mat-option [value]="''">כל הדיווחים</mat-option>
+        <mat-option *ngFor="let type of types" [value]="type">
+            {{ type }}
+        </mat-option>
+    </mat-select>
+</mat-form-field>
+
+<button mat-raised-button color="primary" (click)="exportToExcel()">ייצא דיווחים</button>
+<button mat-raised-button color="accent" (click)="applyFilters()"><mat-icon>filter_list</mat-icon>סנן תוצאות</button>
+
+
+</form>
+
+</mat-card>
+
+
+<table *ngIf="filteredReports.length > 0">
+  <thead>
+    <tr>
+      <th>שם מאבטח</th>
+      <th>סוג דיווח</th>
+      <th>תאריך</th>
+      <th *ngIf="reportHasField('scheduledHour')">שעת מקור</th>
+      <th *ngIf="reportHasField('actualHour')">שעת הגעה</th>
+      <th *ngIf="reportHasField('startDate')">תאריך התחלה</th>
+      <th *ngIf="reportHasField('endDate')">תאריך סיום</th>
+      <th *ngIf="reportHasField('sickNote')">אישור מחלה</th>
+      <th>סיבה</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let report of filteredReports">
+      <br><br>
+      <td>{{ report.guardName }}</td>
+      <td>{{ report.type }}</td>
+      <td >{{ report.date ? (report.date | date:'dd/MM/yyyy') : '-' }}</td>
+      <td *ngIf="reportHasField('scheduledHour')">
+        {{ report.scheduledHour || '-' }}
+      </td>
+      <td *ngIf="reportHasField('actualHour')">
+        {{ report.actualHour || '-' }}
+      </td>
+      <td *ngIf="reportHasField('startDate')">
+        {{ report.startDate | date:'dd/MM/yyyy' }}
+      </td>
+      <td *ngIf="reportHasField('endDate')">
+        {{ report.endDate | date:'dd/MM/yyyy' }}
+      </td>
+      <td *ngIf="reportHasField('sickNote')">
+        {{ report.sickNote ? 'כן' : 'לא' }}
+      </td>
+      <td>{{ report.reason || '-' }}</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+ <!-- //ניסיוןןןן -->
+  <!-- <mat-card>
+  <mat-card-title>ייצוא דוחות</mat-card-title>
+
+  <form class="filter-form">
+    <mat-form-field>
+      <mat-label>סוג דיווח</mat-label>
+      <mat-select [(ngModel)]="searchType" name="type">
+        <mat-option [value]="''">הכל</mat-option>
+        <mat-option *ngFor="let type of types" [value]="type">{{ type }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>מתאריך</mat-label>
+      <input matInput [matDatepicker]="startPicker" [(ngModel)]="startDate" name="startDate">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>עד תאריך</mat-label>
+      <input matInput [matDatepicker]="endPicker" [(ngModel)]="endDate" name="endDate">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="applyFilter()">סנן</button>
+    <button mat-raised-button color="accent" (click)="exportToExcel()">ייצא לאקסל</button>
+  </form>
+
+  <table *ngIf="filteredReports.length > 0" class="report-table">
+    <thead>
+      <tr>
+        <th *ngFor="let col of displayedColumns">{{ col.header }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let report of filteredReports">
+        <td *ngFor="let col of displayedColumns">
+          {{ col.format ? col.format(report[col.field]) : report[col.field] }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</mat-card> -->

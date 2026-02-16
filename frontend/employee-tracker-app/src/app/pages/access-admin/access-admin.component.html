@@ -1,0 +1,162 @@
+<mat-card class="access-admin" dir="rtl">
+  <div class="title-row">
+    <h2>ניהול גישה</h2>
+  </div>
+
+
+  <section class="section">
+    <div class="section-header">
+      <h3>רשימת מורשים (Allowlist)</h3>
+      <span class="spacer"></span>
+      <mat-form-field appearance="outline" class="filter">
+        <mat-label>סינון</mat-label>
+        <input matInput (keyup)="applyAllowlistFilter($event)" placeholder="חפש אימייל/תפקיד..." />
+        <button *ngIf="allowlistFilter" matSuffix mat-icon-button aria-label="נקה" (click)="clearAllowlistFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingAllowlist; else allowlistLoading">
+      <table mat-table [dataSource]="allowlistDS" matSort class="mat-elevation-z1">
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>אימייל</th>
+          <td mat-cell *matCellDef="let row">{{ row.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>תפקיד</th>
+          <td mat-cell *matCellDef="let row">{{ row.role }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>תאריך יצירה</th>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>פעולות</th>
+          <td mat-cell *matCellDef="let row">
+            <button mat-icon-button color="warn" (click)="deleteEmail(row._id)" matTooltip="מחק">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="allowlistDisplayed"></tr>
+        <tr mat-row *matRowDef="let row; columns: allowlistDisplayed"></tr>
+      </table>
+
+      <mat-paginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+
+      <!-- <div class="empty" *ngIf="allowlistDS?.data?.length === 0">
+        אין רשומות להצגה.
+      </div> -->
+      <div class="empty" *ngIf="allowlistDS && allowlistDS.data && allowlistDS.data.length === 0">
+             אין רשומות להצגה.
+      </div>
+    </div>
+
+    <ng-template #allowlistLoading>
+      <div class="loading">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      </div>
+    </ng-template>
+  </section>
+
+  <mat-divider></mat-divider>
+
+ 
+  <section class="section">
+    <div class="section-header">
+      <h3>משתמשים בארגון</h3>
+      <span class="spacer"></span>
+      <mat-form-field appearance="outline" class="filter">
+        <mat-label>סינון</mat-label>
+        <input matInput (keyup)="applyUsersFilter($event)" placeholder="חפש שם/אימייל/תפקיד..." />
+        <button *ngIf="usersFilter" matSuffix mat-icon-button aria-label="נקה" (click)="clearUsersFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <div class="table-wrap" *ngIf="!loadingUsers; else usersLoading">
+      <table mat-table [dataSource]="usersDS" matSort class="mat-elevation-z1">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>שם</th>
+          <td mat-cell *matCellDef="let u">{{ u.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>אימייל</th>
+          <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="role">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>תפקיד</th>
+          <td mat-cell *matCellDef="let u">{{ u.role }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="usersDisplayed"></tr>
+        <tr mat-row *matRowDef="let row; columns: usersDisplayed"></tr>
+      </table>
+
+      <mat-paginator #usersPaginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+
+      <!-- <div class="empty" *ngIf="usersDS?.data?.length === 0">
+        אין משתמשים להצגה.
+      </div> -->
+      <div class="empty" *ngIf="usersDS && usersDS.data && usersDS.data.length === 0">
+         אין משתמשים להצגה.
+      </div>
+    </div>
+
+    <ng-template #usersLoading>
+      <div class="loading">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      </div>
+    </ng-template>
+  </section>
+
+  <mat-divider></mat-divider>
+
+
+  <section class="section">
+    <h3>הוספת משתמש חדש לרשימת המורשים</h3>
+    <div class="add-row">
+      <mat-form-field appearance="outline">
+        <mat-label>אימייל חדש</mat-label>
+        <input
+          matInput
+          type="email"
+          [(ngModel)]="newEmail"
+          #emailCtrl="ngModel"
+          required
+          email
+          placeholder="name@example.com"
+        />
+        <mat-error *ngIf="emailCtrl.invalid && emailCtrl.touched">
+          נא להזין אימייל תקין
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>תפקיד</mat-label>
+        <mat-select [(ngModel)]="newRole" required>
+          <mat-option value="user">משתמש</mat-option>
+          <mat-option value="admin">מנהל</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="addEmail(emailCtrl)"
+        [disabled]="adding || emailCtrl.invalid || !newRole"
+      >
+        <mat-icon>person_add</mat-icon>
+        הוסף
+      </button>
+    </div>
+  </section>
+</mat-card>

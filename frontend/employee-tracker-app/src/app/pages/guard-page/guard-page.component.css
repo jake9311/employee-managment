@@ -1,0 +1,39 @@
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+  direction: rtl;
+  text-align: right;
+}
+
+.filter-bar mat-form-field {
+  width: 200px;
+}
+
+.align-right {
+  direction: rtl;
+  text-align: right;
+}
+
+.mat-header-cell, .mat-cell{
+    direction: rtl;
+    text-align: right
+}
+
+
+
+.title mat-card-title{
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: rgb(9, 9, 58);
+  background-color: #f1f1f1;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.mat-column-date {
+  width: 120px;
+  max-width: 120px;
+  white-space: nowrap;
+}

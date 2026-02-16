@@ -1,0 +1,22 @@
+
+
+<div class="container">
+  <h2 class="title">רשימת עובדים</h2>
+
+  <table mat-table [dataSource]="guards" class="mat-elevation-z8 custom-table">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef class="align-right">שם העובד :</th>
+      <td mat-cell *matCellDef="let guard" class="align-right"><button mat-button  (click)="viewGuardReports(guard._id)">{{ guard.name }}</button></td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <br />
+
+  <mat-form-field>
+    <input matInput placeholder="הוסף מאבטח חדש" [(ngModel)]="newGuardName" />
+  </mat-form-field>
+  <button mat-raised-button color="primary" (click)="addGuard(newGuardName)">הוסף</button>
+</div>

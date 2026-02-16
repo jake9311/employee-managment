@@ -1,0 +1,38 @@
+
+<header class="main-header">
+
+    <span class="logo" >מערכת ניהול עובדים</span>
+    <button mat-icon-button [matMenuTriggerFor]="menu">
+    <mat-icon>menu</mat-icon>
+</button>
+
+<!-- <span class="spacer"></span> -->
+
+
+
+<mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="homePage()">
+        <mat-icon><span>home</span></mat-icon>דף הבית</button >
+
+    <button mat-menu-item (click)="guardListPage()" >
+        <mat-icon><span>list</span></mat-icon>רשימת עובדים
+    </button> 
+
+    <button mat-menu-item (click)="exportReportsPage()" >
+        <mat-icon><span>open_in_new</span></mat-icon>ייצא דוחות
+    </button>
+
+    <button mat-menu-item *ngIf="(role$ | async) === 'owner'" 
+    (click)="accessAdminPage()" >
+    <mat-icon><span>admin_panel_settings</span></mat-icon>
+   ניהול גישה
+    </button>
+    
+
+
+    <button mat-menu-item (click)="logout()"><mat-icon><span>logout</span></mat-icon>התנתק </button>    
+</mat-menu>
+
+
+  
+</header>

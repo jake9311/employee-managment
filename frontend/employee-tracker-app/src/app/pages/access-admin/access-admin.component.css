@@ -1,0 +1,51 @@
+.access-admin {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 16px;
+}
+
+.title-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: 1fr 200px auto;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0 8px;
+}
+
+.section {
+  margin-top: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.filter {
+  width: 320px;
+  max-width: 100%;
+}
+
+.table-wrap {
+  position: relative;
+}
+
+.loading, .empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 0;
+  color: #777;
+}

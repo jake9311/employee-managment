@@ -1,0 +1,17 @@
+.main-header {
+  display: flex;
+  direction: rtl;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+.spacer {
+  flex: 1;
+}
+
+.logo {
+  font-size: 36px;
+  font-weight: bold;
+  align-items: center;
+  padding-right: 44%;
+}
