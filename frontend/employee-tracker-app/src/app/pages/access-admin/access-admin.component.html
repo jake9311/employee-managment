@@ -49,9 +49,6 @@
 
       <mat-paginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
 
-      <!-- <div class="empty" *ngIf="allowlistDS?.data?.length === 0">
-        אין רשומות להצגה.
-      </div> -->
       <div class="empty" *ngIf="allowlistDS && allowlistDS.data && allowlistDS.data.length === 0">
              אין רשומות להצגה.
       </div>
@@ -103,9 +100,7 @@
 
       <mat-paginator #usersPaginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
 
-      <!-- <div class="empty" *ngIf="usersDS?.data?.length === 0">
-        אין משתמשים להצגה.
-      </div> -->
+  
       <div class="empty" *ngIf="usersDS && usersDS.data && usersDS.data.length === 0">
          אין משתמשים להצגה.
       </div>

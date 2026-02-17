@@ -1,0 +1,29 @@
+
+ .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  direction: rtl;
+}
+
+.reports-table {
+  width: 100%;
+  min-width: 1100px;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  text-align: right;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.reason-cell {
+  white-space: normal !important;
+  word-break: break-word;
+  min-width: 380px;
+  max-width: 600px;
+}
+
+.mat-mdc-header-row {
+  background: #fafafa;
+}

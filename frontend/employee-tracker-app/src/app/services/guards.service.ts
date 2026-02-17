@@ -15,7 +15,6 @@ async addGuard(guardName: string): Promise<void>{
     const user = this.auth.currentUser;
     if(!user) throw new Error('User not logged in');
     const token = await user.getIdToken();
-    // const payload = {name: guardName, ownerId: user.uid};
     const payload = {name: guardName};
 
 console.log('📦 Payload to server:', payload);
@@ -55,12 +54,23 @@ async getReports(): Promise<any[]> {
     if (!user) throw new Error('User not logged in');
     const token = await user.getIdToken();
 
-    // const url = `http://localhost:3000/api/guards/reports/${guardId}`;
     const url = `http://localhost:3000/api/guards/${guardId}/reports`;
     return await firstValueFrom(
       this.http.get<any[]>(url, { headers: { Authorization: `Bearer ${token}` } })
     );
   }
+
+  async updateSickApproval(guardId: string, sickDayId: string, hasApproval: boolean): Promise<void> {
+  const user = this.auth.currentUser;
+  if (!user) throw new Error('User not logged in');
+  const token = await user.getIdToken();
+
+  const url = `http://localhost:3000/api/guards/${guardId}/sickDay/${sickDayId}/approval`;
+  await firstValueFrom(
+    this.http.put(url, { hasApproval }, { headers: { Authorization: `Bearer ${token}` } })
+  );
+}
+
 
 
 

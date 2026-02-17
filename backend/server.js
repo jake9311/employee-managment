@@ -64,8 +64,6 @@ mongoose.connect(uri)
 
 app.listen(port,()=>{
     console.log("Server is running on port ", port);
-    checkSickDayApprovals();
-    // setInterval(checkSickDayApprovals, 24 * 60 * 60 * 1000);
     cron.schedule('0 8 * * *', checkSickDayApprovals);
 
 })

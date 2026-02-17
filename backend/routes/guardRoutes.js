@@ -18,7 +18,7 @@ router.delete('/:id', guardController.deleteGuard);
 router.put('/:id/lateEntry', guardController.addLateEntry);
 router.put('/:id/sickDay', guardController.addSickDay);
 router.put('/:id/cancellation', guardController.addCancellation);
-
+router.put('/:id/sickDay/:sickDayId/approval', guardController.updateSickDayApproval);
 
 
 module.exports = router;

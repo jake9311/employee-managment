@@ -117,7 +117,8 @@ res.status(500).json({error: err.message});
 
 
 
-            guard.sickDays.push({startDate, endDate, reason});
+            guard.sickDays.push({
+                startDate, endDate, reason, hasApproval : false, notified: false});
             await guard.save();
             res.json({message: "Sick day added", guard});
         }catch (err){
@@ -126,8 +127,6 @@ res.status(500).json({error: err.message});
     }
 
     exports.checkSickDayApprovals= async()=>{
-    
-
         const guards= await Guard.find();
         const now=new Date();
         for (const guard of guards){
@@ -168,6 +167,42 @@ res.status(500).json({error: err.message});
         }
     };
 
+    exports.updateSickDayApproval = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { id, sickDayId } = req.params;
+    const { hasApproval } = req.body;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const guard = await Guard.findOne({ _id: id, orgId: user.orgId });
+    if (!guard) return res.status(404).json({ error: 'Guard not found or access denied' });
+
+    const sickDay = guard.sickDays.id(sickDayId);
+    if (!sickDay) return res.status(404).json({ error: 'Sick day not found' });
+
+    sickDay.hasApproval = !!hasApproval;
+
+    if (sickDay.hasApproval) sickDay.notified = true;
+
+    await guard.save();
+
+    return res.json({
+      message: 'Sick approval updated',
+      guardId: guard._id,
+      sickDayId,
+      hasApproval: sickDay.hasApproval,
+      notified: sickDay.notified
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
     exports.addCancellation=async (req, res)=>{
         const {id}= req.params;
         const {date, reason}= req.body;
@@ -198,9 +233,10 @@ res.status(500).json({error: err.message});
             const guards= await Guard.find({orgId: user.orgId});
 
             const reports= guards.map(guard=>{
-                const late= guard.lateEntries.map(entry=>({type:"איחור", date:entry.date, reason:entry.reason, scheduledHour:entry.scheduledHour, actualHour:entry.actualHour, guardName:guard.name, guardId:guard._id}));
-                const sick= guard.sickDays.map(sickDay=>({type:"מחלה", startDate:sickDay.startDate, endDate:sickDay.endDate, reason:sickDay.reason, guardName:guard.name, guardId:guard._id}));
-                const cancellations= guard.cancellations.map(cancellation=>({type:"ביטול", date:cancellation.date, reason:cancellation.reason, guardName:guard.name, guardId:guard._id}));
+                const late= guard.lateEntries.map(entry=>({type:"איחור", rnteyId:entry._id,date:entry.date, reason:entry.reason, scheduledHour:entry.scheduledHour, actualHour:entry.actualHour, guardName:guard.name, guardId:guard._id}));
+                const sick= guard.sickDays.map(sickDay=>({type:"מחלה", sickDayId:sickDay._id,
+                    startDate:sickDay.startDate, endDate:sickDay.endDate, reason:sickDay.reason, guardName:guard.name, guardId:guard._id, hasApproval: sickDay.hasApproval, notified: sickDay.notified}));
+                const cancellations= guard.cancellations.map(cancellation=>({type:"ביטול", cancellationId:cancellation._id,date:cancellation.date, reason:cancellation.reason, guardName:guard.name, guardId:guard._id}));
                 return [...late, ...sick, ...cancellations];
                     
                 });
@@ -230,27 +266,35 @@ exports.getReportsByGuardId = async (req, res) => {
 
     const late = guard.lateEntries.map(entry => ({
       type: "איחור",
+      entryId: entry._id,
       date: entry.date,
       reason: entry.reason,
       scheduledHour: entry.scheduledHour,
       actualHour: entry.actualHour,
-      guardName: guard.name
+      guardName: guard.name,
+      guardId: guard._id
     }));
 
     const sick = guard.sickDays.map(entry => ({
       type: "מחלה",
+      sickDayId: entry._id,
       date: entry.startDate, 
       startDate: entry.startDate,
       endDate: entry.endDate,
       reason: entry.reason,
-      guardName: guard.name
+      guardName: guard.name,
+      hasApproval: entry.hasApproval,
+      notified: entry.notified,
+      guardId: guard._id
     }));
 
-    const cancellations = guard.cancellations.map(entry => ({
+    const cancellations = guard.cancellations.map(cancellation => ({
       type: "ביטול",
-      date: entry.date,
-      reason: entry.reason,
-      guardName: guard.name
+      cancellationId: cancellation._id,
+      date: cancellation.date,
+      reason: cancellation.reason,
+      guardName: guard.name,
+      guardId: guard._id
     }));
 
     const allReports = [...late, ...sick, ...cancellations];

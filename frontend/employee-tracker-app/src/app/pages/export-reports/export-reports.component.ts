@@ -1,187 +1,253 @@
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
-import { HttpClient } from '@angular/common/http';
-import {MatSelectModule} from '@angular/material/select';
-import {MatAutocompleteModule} from '@angular/material/autocomplete';
+import { MatSelectModule } from '@angular/material/select';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatIconModule } from '@angular/material/icon';
+
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, MatSortModule } from '@angular/material/sort';
+
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-export-reports',
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatIconModule, MatButtonModule, MatCardModule, MatDatepickerModule,MatSelectModule, MatNativeDateModule, MatAutocompleteModule],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatSelectModule,
+    MatNativeDateModule,
+    MatAutocompleteModule,
+    MatTableModule,
+    MatSortModule
+  ],
   templateUrl: './export-reports.component.html',
   styleUrl: './export-reports.component.css'
 })
 export class ExportReportsComponent implements OnInit {
-guards: any[] = [];
-originalReports: any[] = [];
-filteredReports: any[] = [];
-selectedGuardId: string = '';
-filteredGuards: any[] = [];
-selectedGuardName: string = '';
-selectedType: any = null;
-types: string[] = ['איחור', 'מחלה', 'ביטול'];
-startDate: Date | null = null;
-endDate: Date | null = null;
+  guards: any[] = [];
+  filteredGuards: any[] = [];
 
+  originalReports: any[] = [];
+  filteredReports: any[] = [];
 
+  selectedGuardId: string = '';
+  selectedGuardName: string = '';
+  selectedType: string = '';
+  types: string[] = ['איחור', 'מחלה', 'ביטול'];
 
-constructor(private http: HttpClient, private router: Router) {}
+  startDate: Date | null = null;
+  endDate: Date | null = null;
 
-ngOnInit(): void {
-  const token = localStorage.getItem('token');
-  const userId = localStorage.getItem('userId');
-   if (!token || !userId) {
-        console.error('User not logged in');
-        this.router.navigate(['/login']);
-        return;
-      }
-  this.http.get<any[]>(`http://localhost:3000/api/guards`, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).subscribe({
-    next: data => {
-      this.guards = data;
-      this.filteredGuards= data;
-    },
-    error: err => console.error('שגיאה בטעינת מאבטחים', err)
-  });
+  dataSource = new MatTableDataSource<any>([]);
+  @ViewChild(MatSort) sort!: MatSort;
 
-  this.http.get<any>(`http://localhost:3000/api/guards/lastReports`, {
-    headers: { Authorization: `Bearer ${token}` }
-  }).subscribe({
-    next: data => {
-      this.originalReports = data;
-      this.filteredReports = [...data];
-    },
-    error:err => console.error('שגיאה בטעינת דוחות', err)
-});
-  
-}
+  private allColumns: string[] = [
+    'guardName',
+    'type',
+    'date',
+    'scheduledHour',
+    'actualHour',
+    'startDate',
+    'endDate',
+    'hasApproval',
+    'reason'
+  ];
 
+  displayedColumns: string[] = [];
 
+  constructor(private http: HttpClient, private router: Router) {}
 
-filterGuards(){
-  const value= this.selectedGuardName.toLowerCase();
-  this.filteredGuards= this.guards.filter(guard=> guard.name.toLowerCase().includes(value));
-}
+  ngOnInit(): void {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
 
-onGuardSelected(name: string){
-  const guard= this.guards.find(guard=> guard.name === name);
-  if (guard) {
-    this.selectedGuardId= guard._id;
-}else{
-  this.selectedGuardId='';
-}
-}
+    if (!token || !userId) {
+      console.error('User not logged in');
+      this.router.navigate(['/login']);
+      return;
+    }
 
-
-
-
-applyFilters(){
-  this.filteredReports = this.originalReports.filter(report => {
-    const matchType = !this.selectedType || report.type === this.selectedType;
-    const matchGuard = !this.selectedGuardName || report.guardName === this.selectedGuardName;
-    const reportDate = report.date ? new Date(report.date) : new Date(report.startDate);
-    const start = this.startDate ? new Date(this.startDate) : null;
-    const end = this.endDate ? new Date(this.endDate) : null;
-    const matchStart = !start || reportDate >= start;
-    const matchEnd = !end || reportDate <= end;
-    return matchType && matchGuard && matchStart && matchEnd;
-  });
-}
-
-
-
-
-
-
-// exportToExcel(): void {
-//   const dataToExport = this.filteredReports.map(report => ({
-//     'שם עובד': report.guardName,
-//     'תאריך': report.date,
-//     'סוג': report.type,
-//     'תיאור': report.description
-//   }));
-
-//   const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
-//   const workbook: XLSX.WorkBook = { Sheets: { 'דיווחים': worksheet }, SheetNames: ['דיווחים'] };
-//   const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-//   const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-//   FileSaver.saveAs(blob, 'דיווחים.xlsx');
-
-
-// }
-
-exportToExcel(): void {
-    const dataToExport = this.filteredReports.map(report => {
-      const exportRow: any = {
-        'שם עובד': report.guardName,
-        'סוג': report.type,
-        'תאריך': report.date ? new Date(report.date).toLocaleDateString() : ''
-      };
-
-      if (report.type === 'איחור') {
-        exportRow['שעת מקור'] = report.scheduledHour || '';
-        exportRow['שעת הגעה'] = report.actualHour || '';
-      } else if (report.type === 'מחלה') {
-        exportRow['מתאריך'] = report.startDate ? new Date(report.startDate).toLocaleDateString() : '';
-        exportRow['עד תאריך'] = report.endDate ? new Date(report.endDate).toLocaleDateString() : '';
-        exportRow['אישור מחלה'] = report.sickNote ? 'כן' : 'לא';
-      }
-
-      exportRow['סיבה'] = report.reason || report.description || '';
-      return exportRow;
+    this.http.get<any[]>(`http://localhost:3000/api/guards`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: data => {
+        this.guards = data;
+        this.filteredGuards = data;
+      },
+      error: err => console.error('שגיאה בטעינת מאבטחים', err)
     });
 
-    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook: XLSX.WorkBook = { Sheets: { 'דיווחים': worksheet }, SheetNames: ['דיווחים'] };
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    FileSaver.saveAs(blob, 'דיווחים.xlsx');
+    this.http.get<any[]>(`http://localhost:3000/api/guards/lastReports`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }).subscribe({
+      next: data => {
+        this.originalReports = data || [];
+        this.filteredReports = [...this.originalReports];
+        this.refreshTable(this.filteredReports);
+      },
+      error: err => console.error('שגיאה בטעינת דוחות', err)
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;
+
+    this.dataSource.sortingDataAccessor = (item: any, property: string) => {
+      if (property === 'date') {
+        const d = this.getDisplayDate(item);
+        return d ? d.getTime() : 0;
+      }
+      const v = item?.[property];
+      return typeof v === 'string' ? v.toLowerCase() : v ?? '';
+    };
+  }
+
+  getDisplayDate(r: any): Date | null {
+    const raw = r?.date ?? r?.startDate ?? r?.endDate;
+    return raw ? new Date(raw) : null;
+  }
+
+  filterGuards() {
+    const value = (this.selectedGuardName || '').toLowerCase();
+    this.filteredGuards = this.guards.filter(g =>
+      (g.name || '').toLowerCase().includes(value)
+    );
+  }
+
+  onGuardSelected(name: string) {
+    const guard = this.guards.find(g => g.name === name);
+    this.selectedGuardId = guard ? guard._id : '';
+  }
+
+  applyFilters() {
+    const start = this.startDate ? new Date(this.startDate) : null;
+    const end = this.endDate ? new Date(this.endDate) : null;
+
+    this.filteredReports = this.originalReports.filter(report => {
+      const matchType = !this.selectedType || report.type === this.selectedType;
+      const matchGuard = !this.selectedGuardName || report.guardName === this.selectedGuardName;
+
+      const reportDate = this.getDisplayDate(report);
+      const matchStart = !start || (reportDate && reportDate >= start);
+      const matchEnd = !end || (reportDate && reportDate <= end);
+
+      return matchType && matchGuard && matchStart && matchEnd;
+    });
+
+    this.refreshTable(this.filteredReports);
+  }
+
+  private refreshTable(reports: any[]) {
+    this.buildDisplayedColumns(reports);
+    this.dataSource.data = reports;
+
+    if (this.sort) this.dataSource.sort = this.sort;
+  }
+
+  private buildDisplayedColumns(reports: any[]) {
+    const has = (field: string) =>
+      reports?.some(r => r && r[field] !== undefined && r[field] !== null && r[field] !== '');
+
+    this.displayedColumns = this.allColumns.filter(col => {
+      if (['guardName', 'type', 'date', 'reason'].includes(col)) return true;
+      return has(col);
+    });
   }
 
 
+exportToExcel(): void {
+  const headers = [
+    'שם עובד',
+    'סוג',
+    'תאריך',
+    'שעת מקור',
+    'שעת הגעה',
+    'תאריך התחלה',
+    'תאריך סיום',
+    'אישור מחלה',
+    'סיבה'
+  ];
+
+  const rows = this.filteredReports.map((r: any) => {
+    const displayDate = this.getDisplayDate(r);
+
+    return {
+      'שם עובד': r.guardName ?? '',
+      'סוג': r.type ?? '',
+      'תאריך': displayDate ? displayDate.toLocaleDateString() : '',
+
+      'שעת מקור': r.type === 'איחור' ? (r.scheduledHour ?? '') : '',
+      'שעת הגעה': r.type === 'איחור' ? (r.actualHour ?? '') : '',
+
+      'תאריך התחלה': r.type === 'מחלה' && r.startDate ? new Date(r.startDate).toLocaleDateString() : '',
+      'תאריך סיום': r.type === 'מחלה' && r.endDate ? new Date(r.endDate).toLocaleDateString() : '',
+
+      'אישור מחלה': r.type === 'מחלה' ? (r.hasApproval ? 'הובא' : 'לא הובא') : '',
+
+      'סיבה': r.reason ?? r.description ?? ''
+    };
+  });
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(rows, { header: headers });
 
 
+  worksheet['!cols'] = [
+    { wch: 18 }, 
+    { wch: 10 }, 
+    { wch: 12 }, 
+    { wch: 10 }, 
+    { wch: 10 }, 
+    { wch: 14 }, 
+    { wch: 14 }, 
+    { wch: 14 }, 
+    { wch: 70 }, 
+  ];
 
+  const reasonColLetter = 'I';
+  const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
 
-// applyFilters(): void {
-//   this.filteredReports = this.originalReports.filter(report => {
-//     const matchType = !this.reportType || report.type === this.reportType;
-//     const matchName = !this.searchName || report.guardName.includes(this.searchName);
-    
-//     const reportDate = report.date ? new Date(report.date) : new Date(report.startDate);
-//     const start = this.startDate ? new Date(this.startDate) : null;
-//     const end = this.endDate ? new Date(this.endDate) : null;
-    
-//     const matchStart = !start || reportDate >= start;
-//     const matchEnd = !end || reportDate <= end;
+  for (let row = 2; row <= range.e.r + 1; row++) {
+    const cellAddress = `${reasonColLetter}${row}`;
+    const cell = worksheet[cellAddress];
+    if (cell) {
+      cell.s = cell.s || {};
+      cell.s.alignment = { wrapText: true, vertical: 'top' };
+    }
+  }
 
-//     return matchType && matchName && matchStart && matchEnd;
-//   });
-// }
+  const workbook: XLSX.WorkBook = { Sheets: { 'דיווחים': worksheet }, SheetNames: ['דיווחים'] };
+  const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
+  const blob = new Blob([excelBuffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
 
-
-
-// reportHasField(field: string): boolean {
-//   return this.filteredReports.some(r => r[field] !== undefined&& r[field] !== null);
-// }
-reportHasField(field: string): boolean {
-  return this.filteredReports?.some(report =>
-    report && typeof report === 'object' && field in report && report[field] !== undefined && report[field] !== null && report[field] !== ''
-  );
+  FileSaver.saveAs(blob, 'דיווחים.xlsx');
 }
 
 
-
-
+  reportHasField(field: string): boolean {
+    return this.filteredReports?.some(report =>
+      report && typeof report === 'object' && field in report && report[field] !== undefined && report[field] !== null && report[field] !== ''
+    );
+  }
 }

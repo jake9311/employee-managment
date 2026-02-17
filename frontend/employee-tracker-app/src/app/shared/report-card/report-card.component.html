@@ -19,6 +19,22 @@
             <p><strong>מתאריך: </strong> {{ report.startDate | date:'dd/MM/yyyy' }}</p>
             <p><strong>עד תאריך:</strong> {{ report.endDate | date:'dd/MM/yyyy' }}</p>
             <p><strong>סיבה:</strong> {{ report.reason }}</p>
+    <p class="approval-row">
+  <span>
+    <strong>אישור מחלה:</strong>
+    {{ report.hasApproval ? 'הובא ✅' : 'לא הובא ❌' }}
+  </span>
+
+  <button
+    mat-raised-button
+    (click)="toggleApproval()"
+    [disabled]="saving">
+    {{ report.hasApproval ? 'סמן: לא הובא' : 'סמן: הובא' }}
+  </button>
+</p>
+
+           
+
         </ng-container>
 
         <ng-container *ngIf="report.type === 'ביטול'">

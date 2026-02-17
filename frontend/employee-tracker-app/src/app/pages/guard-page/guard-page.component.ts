@@ -37,12 +37,12 @@ export class GuardPageComponent implements OnInit {
   ngOnInit(): void {
     this.route.paramMap.subscribe(params => {
       const guardId= params.get('id');
-      // const ownerId= localStorage.getItem('userId');
+   
       const token= localStorage.getItem('token');
       if(!token){
         this.router.navigate(['/login']);
       }
-      // if (guardId&&ownerId){ 
+  
       if(guardId){
       this.loadReports( guardId);
     }})};
@@ -50,6 +50,7 @@ export class GuardPageComponent implements OnInit {
   
 
 private async loadReports(guardId: string): Promise<void> {
+
   try {
     const data = await this.guardsService.getReportsByGuard(guardId);
     this.originalReports = data;
