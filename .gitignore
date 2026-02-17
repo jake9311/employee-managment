@@ -1,5 +1,5 @@
 .env
-
+backend/secrets/
 
 #word documents
 *.docx
@@ -20,3 +20,7 @@ playwright-report/
 *.xlsx
 *.xls
 *.csv
+
+# Angular environments 
+src/environments/
+frontend/employee-tracker-app/src/environments/

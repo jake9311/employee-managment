@@ -1,0 +1,13 @@
+[35mpackage-lock.json[m[36m:[m    "node_modules/@[1;31mmongodb[m-js/saslprep": {
+[35mpackage-lock.json[m[36m:[m      "resolved": "https://registry.npmjs.org/@[1;31mmongodb[m-js/saslprep/-/saslprep-1.3.0.tgz",
+[35mpackage-lock.json[m[36m:[m    "node_modules/[1;31mmongodb[m": {
+[35mpackage-lock.json[m[36m:[m      "resolved": "https://registry.npmjs.org/[1;31mmongodb[m/-/[1;31mmongodb[m-6.17.0.tgz",
+[35mpackage-lock.json[m[36m:[m        "@[1;31mmongodb[m-js/saslprep": "^1.1.9",
+[35mpackage-lock.json[m[36m:[m        "[1;31mmongodb[m-connection-string-url": "^3.0.0"
+[35mpackage-lock.json[m[36m:[m        "@[1;31mmongodb[m-js/zstd": "^1.1.0 || ^2.0.0",
+[35mpackage-lock.json[m[36m:[m        "[1;31mmongodb[m-client-encryption": ">=6.0.0 <7",
+[35mpackage-lock.json[m[36m:[m        "@[1;31mmongodb[m-js/zstd": {
+[35mpackage-lock.json[m[36m:[m        "[1;31mmongodb[m-client-encryption": {
+[35mpackage-lock.json[m[36m:[m    "node_modules/[1;31mmongodb[m-connection-string-url": {
+[35mpackage-lock.json[m[36m:[m      "resolved": "https://registry.npmjs.org/[1;31mmongodb[m-connection-string-url/-/[1;31mmongodb[m-connection-string-url-3.0.2.tgz",
+[35mpackage-lock.json[m[36m:[m        "[1;31mmongodb[m": "~6.17.0",

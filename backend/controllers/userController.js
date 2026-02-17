@@ -36,7 +36,10 @@ function ensureOwner(res, me) {
 
 
 exports.login = async (req, res) => {
-  const { googleId, name, email } = req.body || {};
+  // const { googleId, name, email } = req.body || {};
+  if (!req.user?.googleId) return res.status(401).json({ error: "Unauthorized" });
+const { googleId, name, email } = req.user;
+
   if (!googleId) return res.status(400).json({ error: 'googleId required' });
 
   try {
