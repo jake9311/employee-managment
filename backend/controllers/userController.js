@@ -77,13 +77,6 @@ exports.login = async (req, res) => {
       return res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
     }
 
-    // const someOwner = await User.findOne({ role: 'owner' });
-    // if (someOwner) {
-    //   const allowed = await AllowedEmail.findOne({
-    //     orgId: someOwner.orgId,
-    //     email: normalizeEmail(email),
-    //   });
-
     const allowed = await AllowedEmail.findOne({ email: normalizeEmail(email) });
 
     if (allowed) {
