@@ -77,27 +77,34 @@ exports.login = async (req, res) => {
       return res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
     }
 
-    const someOwner = await User.findOne({ role: 'owner' });
-    if (someOwner) {
-      const allowed = await AllowedEmail.findOne({
-        orgId: someOwner.orgId,
-        email: normalizeEmail(email),
+    // const someOwner = await User.findOne({ role: 'owner' });
+    // if (someOwner) {
+    //   const allowed = await AllowedEmail.findOne({
+    //     orgId: someOwner.orgId,
+    //     email: normalizeEmail(email),
+    //   });
+
+    const allowed = await AllowedEmail.findOne({ email: normalizeEmail(email) });
+
+    if (allowed) {
+      const allowedRoles = new Set(['owner', 'admin', 'user']);
+      const role = allowedRoles.has(allowed.role) ? allowed.role : 'user';
+
+      user = await User.create({
+        googleId,
+        name,
+        email,
+        orgId: allowed.orgId,
+        role,
       });
 
-      if (allowed) {
-        const allowedRoles = new Set(['owner', 'admin', 'user']);
-        const role = allowedRoles.has(allowed.role) ? allowed.role : 'user';
-
-        user = await User.create({
-          googleId,
-          name,
-          email,
-          orgId: someOwner.orgId,
-          role,
-        });
-
-        return res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
-      }
+      return res.json({
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        orgId: user.orgId,
+      });
     }
 
     const canOpen = await OrgCreatorAllow.findOne({ email: normalizeEmail(email) });
