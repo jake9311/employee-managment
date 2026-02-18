@@ -8,9 +8,8 @@ describe('GuardListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GuardListComponent]
-    })
-    .compileComponents();
+      imports: [GuardListComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GuardListComponent);
     component = fixture.componentInstance;

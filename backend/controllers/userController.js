@@ -34,22 +34,26 @@ function ensureOwner(res, me) {
   return true;
 }
 
-
 exports.login = async (req, res) => {
   // const { googleId, name, email } = req.body || {};
-  if (!req.user?.googleId) return res.status(401).json({ error: "Unauthorized" });
-const { googleId, name, email } = req.user;
+  if (!req.user?.googleId) return res.status(401).json({ error: 'Unauthorized' });
+  const { googleId, name, email } = req.user;
 
   if (!googleId) return res.status(400).json({ error: 'googleId required' });
 
   try {
     let user = await User.findOne({ googleId });
 
-
     if (user) {
       let changed = false;
-      if (name && name !== user.name) { user.name = name; changed = true; }
-      if (email && email !== user.email) { user.email = email; changed = true; }
+      if (name && name !== user.name) {
+        user.name = name;
+        changed = true;
+      }
+      if (email && email !== user.email) {
+        user.email = email;
+        changed = true;
+      }
       if (changed) await user.save();
 
       if (user.role !== 'owner') {
@@ -85,7 +89,9 @@ const { googleId, name, email } = req.user;
         const role = allowedRoles.has(allowed.role) ? allowed.role : 'user';
 
         user = await User.create({
-          googleId, name, email,
+          googleId,
+          name,
+          email,
           orgId: someOwner.orgId,
           role,
         });
@@ -173,7 +179,7 @@ exports.listUsers = async (req, res) => {
     if (!ensureOwner(res, me)) return;
 
     const users = await User.find({ orgId: me.orgId }).sort({ createdAt: -1 });
-    res.json(users.map(u => ({ id: u._id, name: u.name, email: u.email, role: u.role })));
+    res.json(users.map((u) => ({ id: u._id, name: u.name, email: u.email, role: u.role })));
   } catch {
     res.status(500).json({ error: 'failed to fetch users' });
   }

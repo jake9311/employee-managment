@@ -16,14 +16,13 @@
   text-align: right;
 }
 
-.mat-header-cell, .mat-cell{
-    direction: rtl;
-    text-align: right
+.mat-header-cell,
+.mat-cell {
+  direction: rtl;
+  text-align: right;
 }
 
-
-
-.title mat-card-title{
+.title mat-card-title {
   text-align: center;
   font-family: Arial, sans-serif;
   color: rgb(9, 9, 58);

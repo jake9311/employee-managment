@@ -8,9 +8,8 @@ describe('GuardPageComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GuardPageComponent]
-    })
-    .compileComponents();
+      imports: [GuardPageComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GuardPageComponent);
     component = fixture.componentInstance;

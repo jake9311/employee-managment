@@ -10,6 +10,7 @@ export const environment = {
   messagingSenderId: "232784068059",
   appId: "1:232784068059:web:50cc463bb7dea8b941fbfe",
   measurementId: "G-E3VKF21EC3"
-  }
+  },
+  apiUrl: 'http://localhost:3000',
 };
 

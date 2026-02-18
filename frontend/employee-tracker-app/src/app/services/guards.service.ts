@@ -1,79 +1,82 @@
-import {Injectable} from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import {Auth} from '@angular/fire/auth';
+import { Auth } from '@angular/fire/auth';
 import { firstValueFrom } from 'rxjs';
-import {user} from '@angular/fire/auth';
+import { user } from '@angular/fire/auth';
+import { environment } from '../../environments/environment';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class GuardsService {
+  constructor(
+    private http: HttpClient,
+    private auth: Auth
+  ) {}
 
-    constructor(private http: HttpClient, private auth: Auth){}
-
-async addGuard(guardName: string): Promise<void>{
+  async addGuard(guardName: string): Promise<void> {
     const user = this.auth.currentUser;
-    if(!user) throw new Error('User not logged in');
+    if (!user) throw new Error('User not logged in');
     const token = await user.getIdToken();
-    const payload = {name: guardName};
+    const payload = { name: guardName };
 
-console.log('📦 Payload to server:', payload);
+    console.log('📦 Payload to server:', payload);
 
-
-try{
-    await firstValueFrom(this.http.post('http://localhost:3000/api/guards', payload,
-        {headers: {Authorization: `Bearer ${token}`}}
-    ));
-}catch(error){
-    console.error('failed to add guard',error);
-}
-}
-
-
-    async getGuards():Promise<any[]>{
-        const user=this.auth.currentUser;
-        if(!user) throw new Error('User not logged in');
-        const token= await user.getIdToken();
-        const url=`http://localhost:3000/api/guards`;
-        return await firstValueFrom(this.http.get<any[]>(url, {headers:{Authorization: `Bearer ${token}`}}));
+    try {
+      await firstValueFrom(
+        this.http.post(`${environment.apiUrl}/api/guards`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+      );
+    } catch (error) {
+      console.error('failed to add guard', error);
     }
+  }
 
-
-async getReports(): Promise<any[]> {
-    const user = this.auth.currentUser;
-    if (!user) throw new Error('User not logged in');
-    const token= await user.getIdToken();
-    const url= `http://localhost:3000/api/guards/lastReports`;
-
-    return await firstValueFrom(this.http.get<any[]>(url,
-         {headers:{Authorization: `Bearer ${token}`}}));
-}
-
- async getReportsByGuard(guardId: string): Promise<any[]> {
+  async getGuards(): Promise<any[]> {
     const user = this.auth.currentUser;
     if (!user) throw new Error('User not logged in');
     const token = await user.getIdToken();
-
-    const url = `http://localhost:3000/api/guards/${guardId}/reports`;
+    const url = `${environment.apiUrl}/api/guards`;
     return await firstValueFrom(
       this.http.get<any[]>(url, { headers: { Authorization: `Bearer ${token}` } })
     );
   }
 
-  async updateSickApproval(guardId: string, sickDayId: string, hasApproval: boolean): Promise<void> {
-  const user = this.auth.currentUser;
-  if (!user) throw new Error('User not logged in');
-  const token = await user.getIdToken();
+  async getReports(): Promise<any[]> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('User not logged in');
+    const token = await user.getIdToken();
+    const url = `${environment.apiUrl}/api/guards/lastReports`;
 
-  const url = `http://localhost:3000/api/guards/${guardId}/sickDay/${sickDayId}/approval`;
-  await firstValueFrom(
-    this.http.put(url, { hasApproval }, { headers: { Authorization: `Bearer ${token}` } })
-  );
+    return await firstValueFrom(
+      this.http.get<any[]>(url, { headers: { Authorization: `Bearer ${token}` } })
+    );
+  }
+
+  async getReportsByGuard(guardId: string): Promise<any[]> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('User not logged in');
+    const token = await user.getIdToken();
+
+    const url = `${environment.apiUrl}/api/guards/${guardId}/reports`;
+    return await firstValueFrom(
+      this.http.get<any[]>(url, { headers: { Authorization: `Bearer ${token}` } })
+    );
+  }
+
+  async updateSickApproval(
+    guardId: string,
+    sickDayId: string,
+    hasApproval: boolean
+  ): Promise<void> {
+    const user = this.auth.currentUser;
+    if (!user) throw new Error('User not logged in');
+    const token = await user.getIdToken();
+
+    const url = `${environment.apiUrl}/api/guards/${guardId}/sickDay/${sickDayId}/approval`;
+    await firstValueFrom(
+      this.http.put(url, { hasApproval }, { headers: { Authorization: `Bearer ${token}` } })
+    );
+  }
 }
-
-
-
-
-}
-
-

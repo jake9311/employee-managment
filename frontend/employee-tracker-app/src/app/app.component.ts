@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router ,RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from './shared/header/header.component';
 import { FooterComponent } from './shared/footer/footer.component';
 
@@ -7,7 +7,7 @@ import { FooterComponent } from './shared/footer/footer.component';
   selector: 'app-root',
   imports: [RouterOutlet, HeaderComponent, FooterComponent],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'employee-tracker-app';
@@ -17,5 +17,3 @@ export class AppComponent {
     return this.router.url === '/login';
   }
 }
-
-

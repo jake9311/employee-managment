@@ -42,7 +42,8 @@
   position: relative;
 }
 
-.loading, .empty {
+.loading,
+.empty {
   display: flex;
   justify-content: center;
   align-items: center;

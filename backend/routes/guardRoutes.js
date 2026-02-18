@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const guardController = require('../controllers/guardController');
 
-
 //reports
 router.get('/lastReports', guardController.getLastReports);
 // router.get('/:reports/:guardId', guardController.getReportsByGuardId);
@@ -19,6 +18,5 @@ router.put('/:id/lateEntry', guardController.addLateEntry);
 router.put('/:id/sickDay', guardController.addSickDay);
 router.put('/:id/cancellation', guardController.addCancellation);
 router.put('/:id/sickDay/:sickDayId/approval', guardController.updateSickDayApproval);
-
 
 module.exports = router;

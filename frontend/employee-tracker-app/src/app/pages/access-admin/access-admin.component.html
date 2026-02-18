@@ -3,7 +3,6 @@
     <h2>ניהול גישה</h2>
   </div>
 
-
   <section class="section">
     <div class="section-header">
       <h3>רשימת מורשים (Allowlist)</h3>
@@ -11,7 +10,13 @@
       <mat-form-field appearance="outline" class="filter">
         <mat-label>סינון</mat-label>
         <input matInput (keyup)="applyAllowlistFilter($event)" placeholder="חפש אימייל/תפקיד..." />
-        <button *ngIf="allowlistFilter" matSuffix mat-icon-button aria-label="נקה" (click)="clearAllowlistFilter()">
+        <button
+          *ngIf="allowlistFilter"
+          matSuffix
+          mat-icon-button
+          aria-label="נקה"
+          (click)="clearAllowlistFilter()"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
@@ -31,7 +36,7 @@
 
         <ng-container matColumnDef="createdAt">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>תאריך יצירה</th>
-          <td mat-cell *matCellDef="let row">{{ row.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td mat-cell *matCellDef="let row">{{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="actions">
@@ -47,10 +52,14 @@
         <tr mat-row *matRowDef="let row; columns: allowlistDisplayed"></tr>
       </table>
 
-      <mat-paginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+      <mat-paginator
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 25]"
+        showFirstLastButtons
+      ></mat-paginator>
 
       <div class="empty" *ngIf="allowlistDS && allowlistDS.data && allowlistDS.data.length === 0">
-             אין רשומות להצגה.
+        אין רשומות להצגה.
       </div>
     </div>
 
@@ -63,7 +72,6 @@
 
   <mat-divider></mat-divider>
 
- 
   <section class="section">
     <div class="section-header">
       <h3>משתמשים בארגון</h3>
@@ -71,7 +79,13 @@
       <mat-form-field appearance="outline" class="filter">
         <mat-label>סינון</mat-label>
         <input matInput (keyup)="applyUsersFilter($event)" placeholder="חפש שם/אימייל/תפקיד..." />
-        <button *ngIf="usersFilter" matSuffix mat-icon-button aria-label="נקה" (click)="clearUsersFilter()">
+        <button
+          *ngIf="usersFilter"
+          matSuffix
+          mat-icon-button
+          aria-label="נקה"
+          (click)="clearUsersFilter()"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </mat-form-field>
@@ -98,11 +112,15 @@
         <tr mat-row *matRowDef="let row; columns: usersDisplayed"></tr>
       </table>
 
-      <mat-paginator #usersPaginator [pageSize]="10" [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+      <mat-paginator
+        #usersPaginator
+        [pageSize]="10"
+        [pageSizeOptions]="[5, 10, 25]"
+        showFirstLastButtons
+      ></mat-paginator>
 
-  
       <div class="empty" *ngIf="usersDS && usersDS.data && usersDS.data.length === 0">
-         אין משתמשים להצגה.
+        אין משתמשים להצגה.
       </div>
     </div>
 
@@ -114,7 +132,6 @@
   </section>
 
   <mat-divider></mat-divider>
-
 
   <section class="section">
     <h3>הוספת משתמש חדש לרשימת המורשים</h3>
@@ -130,9 +147,7 @@
           email
           placeholder="name@example.com"
         />
-        <mat-error *ngIf="emailCtrl.invalid && emailCtrl.touched">
-          נא להזין אימייל תקין
-        </mat-error>
+        <mat-error *ngIf="emailCtrl.invalid && emailCtrl.touched"> נא להזין אימייל תקין </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline">

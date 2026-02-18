@@ -7,10 +7,10 @@ export class OwnerOnlyGuard implements CanActivate {
 
   canActivate(): boolean {
     const token = localStorage.getItem('token');
-    const role  = localStorage.getItem('role'); 
+    const role = localStorage.getItem('role');
     if (token && role === 'owner') return true;
 
-    this.router.navigate(['/']); 
+    this.router.navigate(['/']);
     return false;
   }
 }
