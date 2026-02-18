@@ -1,0 +1,20 @@
+{
+  "name": "employee-tracker-backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
+    "axios": "^1.13.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.6.1",
+    "mongoose": "^8.16.0",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.13"
+  }
+}
