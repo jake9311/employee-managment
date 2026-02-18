@@ -142,7 +142,7 @@ res.status(500).json({error: err.message});
 
                 
                 if(!sickDay.hasApproval && !sickDay.notified && differentDays>=4){
-                    const userInOrg= await User.find({orgId: guard.orgId});
+                    const userInOrg= await User.find({orgId: guard.orgId, role: 'user'});
                     let sentAtLeastOne= false;
                     for (const u of userInOrg){
                         if (u.email){
