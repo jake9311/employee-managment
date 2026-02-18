@@ -21,6 +21,4 @@ playwright-report/
 *.xls
 *.csv
 
-# Angular environments 
-src/environments/
-frontend/employee-tracker-app/src/environments/
+
