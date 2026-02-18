@@ -16,7 +16,6 @@ export const routes: Routes = [
   { path: 'guard-list', component: GuardListComponent },
   { path: 'guard-page/:id', component: GuardPageComponent },
   { path: 'export-reports', component: ExportReportsComponent },
-  { path: 'access-admin', component: AccessAdminComponent, canActivate: [OwnerOnlyGuard] },
   {
     path: 'access-admin',
     canActivate: [OwnerOnlyGuard],
