@@ -74,6 +74,8 @@ async function attachUserFromBearer(req, res, next) {
 }
 
 app.use(attachUserFromBearer);
+app.get("/health", (req, res) => res.send("OK"));
+
 
 const userRoutes = require('./routes/userRoutes');
 const guardRoutes = require('./routes/guardRoutes');
