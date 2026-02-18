@@ -78,9 +78,8 @@ export class ExportReportsComponent implements OnInit {
 
   ngOnInit(): void {
     const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
 
-    if (!token || !userId) {
+    if (!token) {
       console.error('User not logged in');
       this.router.navigate(['/login']);
       return;
