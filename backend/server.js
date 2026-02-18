@@ -20,11 +20,25 @@ if (!uri) {
   process.exit(1);
 }
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-  })
-);
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:4200',
+].filter(Boolean);
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS: ' + origin));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.options('*', cors());
+
 
 app.use(express.json());
 
