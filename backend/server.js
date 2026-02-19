@@ -115,7 +115,7 @@ mongoose
       console.log('Server is running on port', port);
     });
     cron.schedule(
-      '0 8 * * *',
+      '15 13 * * *',
       async () => {
         console.log('Running sick day approval check...');
         try {
