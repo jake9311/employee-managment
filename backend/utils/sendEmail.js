@@ -3,10 +3,10 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const axios = require('axios');
 async function sendEmail(to, subject, text) {
   if (!to) throw new Error('Email address is required');
-const sender={ 
-        name: "Employee Tracker",
-        email: process.env.FROM_EMAIL ,
-      };
+  const sender = {
+    name: 'Employee Tracker',
+    email: process.env.FROM_EMAIL,
+  };
   await axios.post(
     'https://api.brevo.com/v3/smtp/email',
     {
