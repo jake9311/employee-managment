@@ -53,4 +53,19 @@ export class ReportCardComponent {
   goBack() {
     this.location.back();
   }
+
+async deleteCurrentReport() {
+  const ok = confirm("למחוק את הדיווח?");
+  if (!ok) return;
+
+  this.saving = true;
+  try {
+    await this.guardsService.deleteReport(this.report);
+    this.goBack();
+  } catch (err: any) {
+    alert(err?.error?.error || err?.message || "שגיאה במחיקה");
+  } finally {
+    this.saving = false;
+  }
+}
 }

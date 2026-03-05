@@ -79,4 +79,46 @@ export class GuardsService {
       this.http.put(url, { hasApproval }, { headers: { Authorization: `Bearer ${token}` } })
     );
   }
+
+async deleteReport(report: any): Promise<void> {
+  const user = this.auth.currentUser;
+  if (!user) throw new Error('User not logged in');
+  const token = await user.getIdToken();
+
+  const guardId = report.guardId;
+
+  let url = '';
+  if (report.type === 'איחור')
+    url = `${environment.apiUrl}/api/guards/${guardId}/late/${report.entryId }`;
+
+  if (report.type === 'מחלה')
+    url = `${environment.apiUrl}/api/guards/${guardId}/sick/${report.sickDayId}`;
+
+  if (report.type === 'ביטול')
+    url = `${environment.apiUrl}/api/guards/${guardId}/cancel/${report.cancellationId}`;
+
+  if (!url) throw new Error('Invalid report type or missing ids');
+
+  await firstValueFrom(
+    this.http.delete(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  );
+}
+
+async deleteGuard(guardId: string): Promise<void> {
+  const user = this.auth.currentUser;
+  if (!user) throw new Error('User not logged in');
+
+  const token = await user.getIdToken();
+
+  const url = `${environment.apiUrl}/api/guards/${guardId}`;
+
+  await firstValueFrom(
+    this.http.delete(url, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  );
+}
+
 }

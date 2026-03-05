@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { Router } from '@angular/router';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-guard-list',
@@ -20,6 +21,7 @@ import { Router } from '@angular/router';
     CommonModule,
     FormsModule,
     MatCardModule,
+    MatIconModule,
   ],
   templateUrl: './guard-list.component.html',
   styleUrl: './guard-list.component.css',
@@ -27,7 +29,7 @@ import { Router } from '@angular/router';
 export class GuardListComponent implements OnInit {
   guards: any[] = [];
   newGuardName: string = '';
-  displayedColumns: string[] = ['name'];
+  displayedColumns: string[] = ['name', 'actions'];
 
   constructor(
     private guardsService: GuardsService,
@@ -54,6 +56,20 @@ export class GuardListComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+
+  async deleteGuard(guard: any) {
+  const ok = confirm(`למחוק את המאבטח ${guard.name}?`);
+  if (!ok) return;
+
+  try {
+    await this.guardsService.deleteGuard(guard._id);
+
+    this.guards = this.guards.filter(g => g._id !== guard._id);
+
+  } catch (err:any) {
+    alert(err?.error?.error || err?.message || "שגיאה במחיקה");
+  }
+}
 
   viewGuardReports(guardId: string) {
     this.router.navigate(['/guard-page', guardId]);

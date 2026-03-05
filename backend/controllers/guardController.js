@@ -55,9 +55,17 @@ exports.updateGuard = async (req, res) => {
 
 exports.deleteGuard = async (req, res) => {
   try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
     const { id } = req.params;
-    await Guard.findByIdAndDelete(id);
-    res.json({ message: 'Guard deleted' });
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const deleted = await Guard.findOneAndDelete({ _id: id, orgId: user.orgId });
+    if (!deleted) return res.status(404).json({ error: 'Guard not found or access denied' });
+
+    res.json({ message: 'Guard deleted', guardId: id });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -216,6 +224,167 @@ exports.addCancellation = async (req, res) => {
   }
 };
 
+exports.updateLateEntry = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, entryId } = req.params;
+    const { date, reason, scheduledHour, actualHour } = req.body;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    if (scheduledHour && actualHour && scheduledHour > actualHour) {
+      return res.status(400).json({ error: 'Scheduled hour must be before actual hour' });
+    }
+
+    const updated = await Guard.findOneAndUpdate(
+      { _id: guardId, orgId: user.orgId, "lateEntries._id": entryId },
+      {
+        $set: {
+          "lateEntries.$.date": date,
+          "lateEntries.$.reason": reason,
+          "lateEntries.$.scheduledHour": scheduledHour,
+          "lateEntries.$.actualHour": actualHour,
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: 'Report not found or access denied' });
+    res.json({ ok: true, message: 'Late entry updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateCancellation = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, cancellationId } = req.params;
+    const { date, reason } = req.body;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const updated = await Guard.findOneAndUpdate(
+      { _id: guardId, orgId: user.orgId, "cancellations._id": cancellationId },
+      {
+        $set: {
+          "cancellations.$.date": date,
+          "cancellations.$.reason": reason,
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: 'Report not found or access denied' });
+    res.json({ ok: true, message: 'Cancellation updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateSickDay = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, sickDayId } = req.params;
+    const { startDate, endDate, reason } = req.body;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (start > end) return res.status(400).json({ error: 'Start date must be before end date' });
+
+    const updated = await Guard.findOneAndUpdate(
+      { _id: guardId, orgId: user.orgId, "sickDays._id": sickDayId },
+      {
+        $set: {
+          "sickDays.$.startDate": startDate,
+          "sickDays.$.endDate": endDate,
+          "sickDays.$.reason": reason,
+        }
+      },
+      { new: true }
+    );
+
+    if (!updated) return res.status(404).json({ error: 'Report not found or access denied' });
+    res.json({ ok: true, message: 'Sick day updated' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteLateEntry = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, entryId } = req.params;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const result = await Guard.updateOne(
+      { _id: guardId, orgId: user.orgId },
+      { $pull: { lateEntries: { _id: entryId } } }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Guard not found or access denied' });
+
+    res.json({ ok: true, message: 'Late entry deleted', entryId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteSickDay = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, sickDayId } = req.params;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const result = await Guard.updateOne(
+      { _id: guardId, orgId: user.orgId },
+      { $pull: { sickDays: { _id: sickDayId } } }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Guard not found or access denied' });
+
+    res.json({ ok: true, message: 'Sick day deleted', sickDayId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteCancellation = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+
+    const { guardId, cancellationId } = req.params;
+
+    const user = await User.findOne({ googleId: req.user.googleId });
+    if (!user) return res.status(403).json({ error: 'User not familiar with the system' });
+
+    const result = await Guard.updateOne(
+      { _id: guardId, orgId: user.orgId },
+      { $pull: { cancellations: { _id: cancellationId } } }
+    );
+
+    if (result.matchedCount === 0) return res.status(404).json({ error: 'Guard not found or access denied' });
+
+    res.json({ ok: true, message: 'Cancellation deleted', cancellationId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.getLastReports = async (req, res) => {
   try {
     if (!req.user) {
@@ -230,7 +399,7 @@ exports.getLastReports = async (req, res) => {
     const reports = guards.map((guard) => {
       const late = guard.lateEntries.map((entry) => ({
         type: 'איחור',
-        rnteyId: entry._id,
+        entryId: entry._id,
         date: entry.date,
         reason: entry.reason,
         scheduledHour: entry.scheduledHour,

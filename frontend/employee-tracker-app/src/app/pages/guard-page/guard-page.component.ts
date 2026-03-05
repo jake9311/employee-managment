@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { GuardsService } from '../../services/guards.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-guard-page',
@@ -107,4 +108,17 @@ export class GuardPageComponent implements OnInit {
   viewReport(report: any) {
     this.router.navigateByUrl('/report-card', { state: { report } });
   }
+
+ async deleteReport(report: any) {
+  const ok = confirm("למחוק את הדיווח? זה בלתי הפיך.");
+  if (!ok) return;
+
+  try {
+    await this.guardsService.deleteReport(report);
+    this.filteredReports = this.filteredReports.filter(r => r !== report);
+    this.originalReports = this.originalReports.filter(r => r !== report);
+  } catch (err: any) {
+    alert(err?.error?.error || err?.message || "שגיאה במחיקה");
+  }
+}
 }

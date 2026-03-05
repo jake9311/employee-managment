@@ -48,17 +48,21 @@
     <td mat-cell *matCellDef="let report">{{ report.reason }}</td>
   </ng-container>
 
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>צפיה</th>
-    <td mat-cell *matCellDef="let report">
-      <button mat-icon-button color="primary" (click)="viewReport(report)">
-        <mat-icon>open_in_new</mat-icon>
-      </button>
-    </td>
-  </ng-container>
+<ng-container matColumnDef="actions">
+  <th mat-header-cell *matHeaderCellDef>פעולות</th>
+  <td mat-cell *matCellDef="let report">
+    <button mat-icon-button color="primary" (click)="viewReport(report)">
+      <mat-icon>open_in_new</mat-icon>
+    </button>
 
-  <tr mat-header-row *matHeaderRowDef="['date', 'type', 'reason', 'actions']"></tr>
-  <tr mat-row *matRowDef="let row; columns: ['date', 'type', 'reason', 'actions']"></tr>
+    <button mat-icon-button color="warn" (click)="deleteReport(report)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </td>
+</ng-container>
+
+<tr mat-header-row *matHeaderRowDef="['date','type','reason','actions']"></tr>
+<tr mat-row *matRowDef="let row; columns: ['date','type','reason','actions']"></tr>
 </table>
 
 <mat-card-actions>

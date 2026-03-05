@@ -38,6 +38,14 @@
       <button mat-button (click)="goBack()">חזור</button>
     </mat-card-actions>
 
+    <mat-card-actions>
+  <button mat-button (click)="goBack()">חזור</button>
+
+  <button mat-raised-button color="warn" (click)="deleteCurrentReport()" [disabled]="saving">
+    מחק דיווח
+  </button>
+</mat-card-actions>
+
     <div *ngIf="!report">
       <p>לא נמצא דיווח להצגה.</p>
     </div>
